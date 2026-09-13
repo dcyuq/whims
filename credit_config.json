@@ -1,0 +1,5 @@
+{
+    "add_credit_msg": "{who_gave} successfully added {credits_added} credits to {who_given}.",
+    "check_credit_msg": "{user} has a total of {credits} credits.",
+    "pay_msg": "{user} paid {price} credits for {item_name}. New balance: {new_adjusted_credit}."
+}
