@@ -300,7 +300,7 @@ def can_update(member, order):
         or member.guild_permissions.manage_messages
     )
 
-NAME_JOINER = " ◟ "
+NAME_JOINER = "\u2800◟\u2800"
 
 def slug_part(text):
     return re.sub(r"[^a-z0-9]+", "-", (text or "").lower()).strip("-")
@@ -318,7 +318,7 @@ def channel_name_for(quantity, status_text, item, opener):
     
     joined_name = NAME_JOINER.join(p for p in parts if p)
     
-    name = f"❀ {joined_name}"
+    name = f"❀\u2800{joined_name}"
     
     return name[:100] or "ticket"
 
