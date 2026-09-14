@@ -166,7 +166,7 @@ def order_values(order, author_id):
         "price": order.get("price", ""),
         "quantity": order.get("quantity", ""),
         "notes": order.get("notes") or "none",
-        "user": f"<@{author_id}>" if author_id else "",
+        "user": order.get("user") or (f"<@{author_id}>" if author_id else ""),
     }
 
 
@@ -813,15 +813,26 @@ class Confirmation(commands.Cog):
         description="Fill in and confirm your order.",
     )
     @app_commands.describe(
+        user="who this confirmation is for",
         item="what you're ordering",
         price="how much it costs",
         quantity="how many",
         notes="any extra notes (optional)",
     )
     @commands.guild_only()
-    async def confirmation(self, ctx, item: str, price: str, quantity: str, *, notes: str = None):
+    async def confirmation(
+        self,
+        ctx,
+        user: discord.Member,
+        item: str,
+        price: str,
+        quantity: str,
+        *,
+        notes: str = None,
+    ):
         settings = settings_for(ctx.guild.id)
         order = {
+            "user": user.mention,
             "item": item.strip(),
             "price": price.strip(),
             "quantity": quantity.strip(),
