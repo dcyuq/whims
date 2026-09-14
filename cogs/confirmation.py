@@ -839,10 +839,30 @@ class Confirmation(commands.Cog):
             "notes": (notes or "").strip(),
         }
         view = ConfirmView(settings, order, ctx.author.id, ctx.guild)
-        await ctx.send(
-            view=view,
-            allowed_mentions=discord.AllowedMentions(everyone=False, roles=False, users=True),
-        )
+
+        # For slash-command use, acknowledge the interaction privately and send
+        # the confirmation as a normal channel message. This prevents Discord
+        # from attaching the public "used /confirmation new" command header to
+        # the confirmation message. Prefix-command use keeps the normal ctx.send.
+        if ctx.interaction is not None:
+            await ctx.interaction.response.defer(ephemeral=True)
+            await ctx.channel.send(
+                view=view,
+                allowed_mentions=discord.AllowedMentions(
+                    everyone=False, roles=False, users=True
+                ),
+            )
+            try:
+                await ctx.interaction.delete_original_response()
+            except discord.HTTPException:
+                pass
+        else:
+            await ctx.send(
+                view=view,
+                allowed_mentions=discord.AllowedMentions(
+                    everyone=False, roles=False, users=True
+                ),
+            )
 
     @confirmation.command(name="setup", description="Set up the confirmation formats.")
     @app_commands.default_permissions(manage_guild=True)
