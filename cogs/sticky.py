@@ -32,7 +32,7 @@ class StickyNote(commands.Cog):
             return
 
         perms = channel.permissions_for(channel.guild.me)
-        if not (perms.view_channel and perms.send_messages and perms.embed_links):
+        if not (perms.view_channel and perms.send_messages):
             return
 
         old_id = entry.get("message_id")
@@ -43,7 +43,12 @@ class StickyNote(commands.Cog):
             except discord.HTTPException:
                 pass
 
-        sent = await embeds.send(channel, embeds.note(entry["content"]))
+        # Send as raw text instead of an embed
+        try:
+            sent = await channel.send(content=entry["content"])
+        except discord.HTTPException:
+            return
+            
         if sent is None:
             return
 
@@ -85,7 +90,8 @@ class StickyNote(commands.Cog):
             return
 
         perms = target.permissions_for(interaction.guild.me)
-        if not (perms.view_channel and perms.send_messages and perms.embed_links):
+        # Removed perms.embed_links requirement
+        if not (perms.view_channel and perms.send_messages):
             await embeds.send(interaction, embeds.error(f"I can't post in {target.mention}."), ephemeral=True)
             return
 
