@@ -124,6 +124,8 @@ DEFAULT_BUTTON = {
 
 CUSTOM_TOKEN = re.compile(r"<(a?):([A-Za-z0-9_~]{2,32}):(\d{15,25})>")
 
+BOT = None
+
 NAME_TOKEN = re.compile(r"^:?([A-Za-z0-9_~]{2,32}):?$")
 
 KEYCAP_HEADS = "0123456789#*"
@@ -296,7 +298,10 @@ def icon_partial(raw):
     if not text:
         return None
 
-    if CUSTOM_TOKEN.fullmatch(text):
+    match = CUSTOM_TOKEN.fullmatch(text)
+    if match:
+        if BOT is not None and BOT.is_ready() and BOT.get_emoji(int(match.group(3))) is None:
+            return None
         try:
             return discord.PartialEmoji.from_str(text)
         except (ValueError, TypeError):
@@ -1869,6 +1874,8 @@ class BuilderView(discord.ui.View):
 class Tickets(commands.Cog):
 
     def __init__(self, bot):
+        global BOT
+        BOT = bot
         self.bot = bot
         self._views_added = False
 
