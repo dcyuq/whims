@@ -300,8 +300,10 @@ def icon_partial(raw):
 
     match = CUSTOM_TOKEN.fullmatch(text)
     if match:
-        if BOT is not None and BOT.is_ready() and BOT.get_emoji(int(match.group(3))) is None:
-            return None
+        if BOT is not None and BOT.is_ready():
+            known = BOT.get_emoji(int(match.group(3)))
+            if known is None or not known.is_usable():
+                return None
         try:
             return discord.PartialEmoji.from_str(text)
         except (ValueError, TypeError):
@@ -1783,11 +1785,22 @@ class BuilderView(discord.ui.View):
     @discord.ui.button(label="Buttons", style=discord.ButtonStyle.secondary)
     async def open_buttons(self, interaction, button):
         view = ButtonsView(self)
-        await interaction.response.send_message(
-            embed=embeds.notice("manage the buttons that appear on your panel."),
-            view=view,
-            ephemeral=True,
-        )
+        try:
+            await interaction.response.send_message(
+                embed=embeds.notice("manage the buttons that appear on your panel."),
+                view=view,
+                ephemeral=True,
+            )
+        except discord.HTTPException:
+            for item in view.children:
+                if isinstance(item, discord.ui.Select):
+                    for option in item.options:
+                        option.emoji = None
+            await interaction.response.send_message(
+                embed=embeds.notice("manage the buttons that appear on your panel."),
+                view=view,
+                ephemeral=True,
+            )
 
     @discord.ui.button(label="Publish", style=discord.ButtonStyle.secondary)
     async def publish(self, interaction, button):
